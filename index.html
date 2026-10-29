@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Biblioteca Virtual - ENSFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#262420;--card:#2d2a26;--line:#3d3933;--tx:#f0ebe3;--mu:#9a9285;--ac:#c4705a;--gr:#7d8f6e}
+[data-theme=light]{--bg:#f6f1ea;--card:#fffdf9;--line:#e2dacd;--tx:#2a2622;--mu:#7a7266}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+.serif{font-family:'Playfair Display',Georgia,serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:74px}
+.brand{display:flex;gap:14px;align-items:center}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--ac)}
+.brand b{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;display:block}
+.brand small{font-size:10px;letter-spacing:.18em;color:var(--gr);text-transform:uppercase}
+.right{display:flex;gap:12px;align-items:center}
+.icon{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card)}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:500}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--tx)}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;padding:48px 0 32px}
+.hero h1{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(36px,6vw,54px);line-height:1.1;max-width:520px}
+.hero em{color:var(--ac)}
+.hero p{color:var(--mu);font-size:13px;line-height:2;margin-top:18px}
+.search{width:314px;max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13px;outline:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.chip{background:none;border:0;color:var(--mu);padding:10px 16px;border-radius:999px;font-size:14px}
+.chip.on{background:var(--gr);color:#fff}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:36px 0 18px}
+.sec h2{font-family:'Playfair Display',serif;font-weight:500;font-size:26px}
+.sec small{color:var(--mu);font-size:11px;margin-left:8px;font-family:Inter}
+.arrows{display:flex;gap:8px}
+.rail{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;scrollbar-width:none}
+.nov{flex:0 0 310px;scroll-snap-align:start;display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}
+.nov .cv{width:62px;height:100px;flex:none}
+.tag{font-size:9px;letter-spacing:.14em;color:var(--mu);text-transform:uppercase}
+.nov h3,.card h3{font-family:'Playfair Display',serif;font-weight:500;font-size:17px;margin:6px 0 4px}
+.nov p,.card p{color:var(--gr);font-size:12px}
+.nov time,.card time{display:block;margin-top:14px;font-size:10px;color:var(--mu)}
+select{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px;padding-bottom:60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px 16px;text-align:center;position:relative}
+.card .cv{width:130px;height:190px;margin:0 auto 14px;cursor:pointer}
+.card .acts{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.card .acts button{font-size:12px;padding:7px 14px;border-radius:10px;background:none;border:1px solid var(--line)}
+.card .acts .del:hover{border-color:#c0504a;color:#c0504a}
+.cv{border-radius:4px 8px 8px 4px;overflow:hidden;box-shadow:0 8px 20px #0005;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:12px 8px;text-align:center;color:#f5ece0;position:relative}
+.cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cv span{font-size:7px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.cv b{font-family:'Playfair Display',serif;font-weight:500;font-size:12px;line-height:1.2;padding:0 2px}
+.card .cv b{font-size:17px}.card .cv span{font-size:9px}
+.empty{grid-column:1/-1;text-align:center;color:var(--mu);padding:50px 0;font-size:14px}
+dialog{margin:auto;border:1px solid var(--line);border-radius:20px;background:var(--bg);color:var(--tx);padding:28px;width:min(460px,92vw)}
+dialog::backdrop{background:#000a}
+dialog h2{font-family:'Playfair Display',serif;font-weight:500;margin-bottom:18px}
+label{display:block;font-size:12px;color:var(--mu);margin:12px 0 6px}
+dialog input:not([type=file]),dialog select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+dialog input[type=file]{width:100%;font-size:12px}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><div class="logo">▮▮▯</div><div><b>Biblioteca Virtual - ENSFA</b><small>Un lugar para distraerse</small></div></div>
+  <div class="right"><button class="icon" id="theme" title="Cambiar tema">☾</button><button class="btn" id="add">+ Agregar libro</button></div>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1>Una biblioteca hecha <em>a tu manera.</em></h1>
+      <p>Tus libros, tus notas y esos mundos a los que siempre puedes regresar.<br>Todo en un mismo lugar, solo para ti.</p>
+    </div>
+    <input class="search" id="q" placeholder="🔍  Buscar por título, autor o tema...">
+  </section>
+
+  <nav class="chips" id="chips"></nav>
+
+  <div class="sec"><h2>Novedades</h2><div class="arrows"><button class="icon" id="prev">‹</button><button class="icon" id="next">›</button></div></div>
+  <div class="rail" id="rail"></div>
+
+  <div class="sec"><h2>Todos mis libros <small id="count"></small></h2>
+    <select id="sort"><option value="rec">Más recientes</option><option value="tit">Título (A-Z)</option><option value="aut">Autor (A-Z)</option></select>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h2>Agregar libro</h2>
+    <label>Título</label><input name="title" required>
+    <label>Autor</label><input name="author" required>
+    <label>Categoría</label><select name="cat" id="catsel"></select>
+    <label>Archivo del libro (PDF o Word)</label><input type="file" name="file" accept=".pdf,.doc,.docx" required>
+    <label>Portada (opcional, imagen)</label><input type="file" name="cover" accept="image/*">
+    <div class="row"><button type="button" class="btn ghost" id="cancel">Cancelar</button><button class="btn" type="submit">Guardar</button></div>
+  </form>
+</dialog>
+
+<script>
+const CATS=['Ficción','Ciencia y tecnología','Humanidades','Desarrollo personal','Infantil y juvenil','Ingeniería','Otros'];
+const COLORS=['#3d5446','#a8553f','#2f4352','#5a4a6b','#6b5a3a','#3f5d5d'];
+let cat='Todos',books=[];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ---- Almacenamiento (IndexedDB, en el navegador) ----
+const dbp=new Promise((res,rej)=>{const r=indexedDB.open('biblioteca-ensfa',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('books',{keyPath:'id'});
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function store(mode,fn){const d=await dbp;return new Promise((res,rej)=>{
+  const t=d.transaction('books',mode),q=fn(t.objectStore('books'));
+  t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)})}
+const load=async()=>{books=(await store('readonly',s=>s.getAll()))||[];draw()};
+
+// ---- Dibujo ----
+function cover(b){
+  const col=COLORS[[...b.title].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
+  const img=b.cover?`<img src="${URL.createObjectURL(b.cover)}" alt="">`:'';
+  return `<div class="cv" style="background:linear-gradient(160deg,${col},#1b1a18)">${img}${b.cover?'':`<span>${esc(b.author)}</span><b>${esc(b.title)}</b><span>Mi biblioteca</span>`}</div>`;
+}
+const fecha=t=>new Date(t).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}).replace(/\./g,'');
+function draw(){
+  $('#chips').innerHTML=['Todos',...CATS].map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  const q=$('#q').value.toLowerCase().trim();
+  let list=books.filter(b=>(cat==='Todos'||b.cat===cat)&&(!q||(b.title+' '+b.author+' '+b.cat).toLowerCase().includes(q)));
+  const s=$('#sort').value;
+  list.sort((a,b)=>s==='tit'?a.title.localeCompare(b.title):s==='aut'?a.author.localeCompare(b.author):b.date-a.date);
+  $('#count').textContent=`${list.length} libro${list.length===1?'':'s'}`;
+  $('#rail').innerHTML=list.slice().sort((a,b)=>b.date-a.date).slice(0,6).map(b=>`
+    <div class="nov" data-open="${b.id}">${cover(b)}<div><div class="tag">Añadido hace poco</div><h3>${esc(b.title)}</h3><p>${esc(b.author)}</p><time>${fecha(b.date)}</time></div></div>`).join('')
+    ||'<div class="empty" style="width:100%">Todavía no hay libros. ¡Agregá el primero!</div>';
+  $('#grid').innerHTML=list.map(b=>`
+    <div class="card"><div data-open="${b.id}">${cover(b)}</div>
+    <h3>${esc(b.title)}</h3><p>${esc(b.author)}</p><time>${esc(b.cat)} · ${fecha(b.date)}</time>
+    <div class="acts"><button data-open="${b.id}">Abrir</button><button class="del" data-del="${b.id}">Eliminar</button></div></div>`).join('')
+    ||'<div class="empty">No se encontraron libros.</div>';
+}
+
+// ---- Acciones ----
+function openBook(id){
+  const b=books.find(x=>x.id===id);if(!b)return;
+  const url=URL.createObjectURL(b.file);
+  if(b.file.type==='application/pdf'||/\.pdf$/i.test(b.fname)){window.open(url,'_blank')}
+  else{const a=document.createElement('a');a.href=url;a.download=b.fname;a.click()}
+}
+document.addEventListener('click',async e=>{
+  const c=e.target.closest('[data-c]');if(c){cat=c.dataset.c;draw()}
+  const o=e.target.closest('[data-open]');if(o&&!e.target.closest('[data-del]'))openBook(o.dataset.open);
+  const d=e.target.closest('[data-del]');
+  if(d&&confirm('¿Eliminar este libro?')){await store('readwrite',s=>s.delete(d.dataset.del));load()}
+});
+$('#q').oninput=draw;$('#sort').onchange=draw;
+$('#prev').onclick=()=>$('#rail').scrollBy({left:-330,behavior:'smooth'});
+$('#next').onclick=()=>$('#rail').scrollBy({left:330,behavior:'smooth'});
+$('#catsel').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
+$('#add').onclick=()=>{$('#form').reset();$('#dlg').showModal()};
+$('#cancel').onclick=()=>$('#dlg').close();
+$('#form').onsubmit=async e=>{
+  const f=new FormData(e.target),file=f.get('file'),cv=f.get('cover');
+  const book={id:crypto.randomUUID(),title:f.get('title').trim(),author:f.get('author').trim(),cat:f.get('cat'),
+    date:Date.now(),file,fname:file.name,cover:cv&&cv.size?cv:null};
+  try{await store('readwrite',s=>s.add(book));load()}catch(err){alert('No se pudo guardar el libro (¿poco espacio?).')}
+};
+$('#theme').onclick=()=>{const h=document.documentElement,l=h.dataset.theme==='dark';
+  h.dataset.theme=l?'light':'dark';$('#theme').textContent=l?'☀':'☾';try{localStorage.setItem('tema',h.dataset.theme)}catch{}};
+try{const t=localStorage.getItem('tema');if(t){document.documentElement.dataset.theme=t;$('#theme').textContent=t==='dark'?'☾':'☀'}}catch{}
+load();
+</script>
+</body>
+</html>
