@@ -69,7 +69,7 @@ dialog input[type=file]{width:100%;font-size:12px}
 <body>
 <header><div class="wrap">
   <div class="brand"><div class="logo">▮▮▯</div><div><b>Biblioteca Virtual - ENSFA</b><small>Un lugar para distraerse</small></div></div>
-  <div class="right"><button class="icon" id="theme" title="Cambiar tema">☾</button><button class="btn" id="add">+ Agregar libro</button></div>
+  <div class="right"><button class="icon" id="theme" title="Cambiar tema">☾</button><button class="btn ghost" id="login">Ingresar</button><button class="btn" id="add" hidden>+ Agregar libro</button></div>
 </div></header>
 
 <main class="wrap">
@@ -104,27 +104,45 @@ dialog input[type=file]{width:100%;font-size:12px}
   </form>
 </dialog>
 
+<dialog id="ldlg">
+  <form id="lform" method="dialog">
+    <h2>Ingresar</h2>
+    <label>Email</label><input name="email" type="email" required>
+    <label>Contraseña</label><input name="pass" type="password" required>
+    <div class="row"><button type="button" class="btn ghost" id="lcancel">Cancelar</button><button class="btn" type="submit">Entrar</button></div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+const SUPABASE_URL='https://oaverldsyjfvsyloaxbt.supabase.co';
+const SUPABASE_KEY='sb_publishable_w7G6WunUZipwJY4g3HMjcw_gypuO4xC';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let admin=false;
 const CATS=['Ficción','Ciencia y tecnología','Humanidades','Desarrollo personal','Infantil y juvenil','Ingeniería','Otros'];
 const COLORS=['#3d5446','#a8553f','#2f4352','#5a4a6b','#6b5a3a','#3f5d5d'];
 let cat='Todos',books=[];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-// ---- Almacenamiento (IndexedDB, en el navegador) ----
-const dbp=new Promise((res,rej)=>{const r=indexedDB.open('biblioteca-ensfa',1);
-  r.onupgradeneeded=()=>r.result.createObjectStore('books',{keyPath:'id'});
-  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
-async function store(mode,fn){const d=await dbp;return new Promise((res,rej)=>{
-  const t=d.transaction('books',mode),q=fn(t.objectStore('books'));
-  t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)})}
-const load=async()=>{books=(await store('readonly',s=>s.getAll()))||[];draw()};
+// ---- Datos (Supabase) ----
+const load=async()=>{
+  const {data,error}=await sb.from('books').select('*').order('created_at',{ascending:false});
+  if(error){console.error(error);$('#grid').innerHTML='<div class="empty">No se pudieron cargar los libros.</div>';return}
+  books=data.map(b=>({...b,date:new Date(b.created_at).getTime()}));draw()};
+const safe=n=>n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]/g,'_');
+async function up(file,folder){
+  const path=`${folder}/${Date.now()}_${safe(file.name)}`;
+  const {error}=await sb.storage.from('libros').upload(path,file,{contentType:file.type||undefined});
+  if(error)throw error;
+  return {path,url:sb.storage.from('libros').getPublicUrl(path).data.publicUrl};
+}
 
 // ---- Dibujo ----
 function cover(b){
   const col=COLORS[[...b.title].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
-  const img=b.cover?`<img src="${URL.createObjectURL(b.cover)}" alt="">`:'';
-  return `<div class="cv" style="background:linear-gradient(160deg,${col},#1b1a18)">${img}${b.cover?'':`<span>${esc(b.author)}</span><b>${esc(b.title)}</b><span>Mi biblioteca</span>`}</div>`;
+  const img=b.cover_url?`<img src="${esc(b.cover_url)}" alt="">`:'';
+  return `<div class="cv" style="background:linear-gradient(160deg,${col},#1b1a18)">${img}${b.cover_url?'':`<span>${esc(b.author)}</span><b>${esc(b.title)}</b><span>Mi biblioteca</span>`}</div>`;
 }
 const fecha=t=>new Date(t).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}).replace(/\./g,'');
 function draw(){
@@ -140,22 +158,20 @@ function draw(){
   $('#grid').innerHTML=list.map(b=>`
     <div class="card"><div data-open="${b.id}">${cover(b)}</div>
     <h3>${esc(b.title)}</h3><p>${esc(b.author)}</p><time>${esc(b.cat)} · ${fecha(b.date)}</time>
-    <div class="acts"><button data-open="${b.id}">Abrir</button><button class="del" data-del="${b.id}">Eliminar</button></div></div>`).join('')
+    <div class="acts"><button data-open="${b.id}">Abrir</button>${admin?`<button class="del" data-del="${b.id}">Eliminar</button>`:''}</div></div>`).join('')
     ||'<div class="empty">No se encontraron libros.</div>';
 }
 
 // ---- Acciones ----
 function openBook(id){
   const b=books.find(x=>x.id===id);if(!b)return;
-  const url=URL.createObjectURL(b.file);
-  if(b.file.type==='application/pdf'||/\.pdf$/i.test(b.fname)){window.open(url,'_blank')}
-  else{const a=document.createElement('a');a.href=url;a.download=b.fname;a.click()}
+  window.open(b.file_url,'_blank');
 }
 document.addEventListener('click',async e=>{
   const c=e.target.closest('[data-c]');if(c){cat=c.dataset.c;draw()}
   const o=e.target.closest('[data-open]');if(o&&!e.target.closest('[data-del]'))openBook(o.dataset.open);
   const d=e.target.closest('[data-del]');
-  if(d&&confirm('¿Eliminar este libro?')){await store('readwrite',s=>s.delete(d.dataset.del));load()}
+  if(d&&confirm('¿Eliminar este libro?')){const b=books.find(x=>x.id===d.dataset.del);await sb.storage.from('libros').remove([b.file_path,b.cover_path].filter(Boolean));await sb.from('books').delete().eq('id',b.id);load()}
 });
 $('#q').oninput=draw;$('#sort').onchange=draw;
 $('#prev').onclick=()=>$('#rail').scrollBy({left:-330,behavior:'smooth'});
@@ -164,14 +180,29 @@ $('#catsel').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
 $('#add').onclick=()=>{$('#form').reset();$('#dlg').showModal()};
 $('#cancel').onclick=()=>$('#dlg').close();
 $('#form').onsubmit=async e=>{
-  const f=new FormData(e.target),file=f.get('file'),cv=f.get('cover');
-  const book={id:crypto.randomUUID(),title:f.get('title').trim(),author:f.get('author').trim(),cat:f.get('cat'),
-    date:Date.now(),file,fname:file.name,cover:cv&&cv.size?cv:null};
-  try{await store('readwrite',s=>s.add(book));load()}catch(err){alert('No se pudo guardar el libro (¿poco espacio?).')}
+  e.preventDefault();
+  const f=new FormData(e.target),file=f.get('file'),cv=f.get('cover'),btn=e.target.querySelector('button[type=submit]');
+  btn.disabled=true;btn.textContent='Subiendo...';
+  try{
+    const a=await up(file,'archivos');
+    const c=cv&&cv.size?await up(cv,'portadas'):null;
+    const {error}=await sb.from('books').insert({title:f.get('title').trim(),author:f.get('author').trim(),cat:f.get('cat'),file_url:a.url,file_path:a.path,cover_url:c&&c.url,cover_path:c&&c.path});
+    if(error)throw error;
+    $('#dlg').close();load();
+  }catch(err){alert('No se pudo guardar: '+(err.message||err))}
+  btn.disabled=false;btn.textContent='Guardar';
 };
 $('#theme').onclick=()=>{const h=document.documentElement,l=h.dataset.theme==='dark';
   h.dataset.theme=l?'light':'dark';$('#theme').textContent=l?'☀':'☾';try{localStorage.setItem('tema',h.dataset.theme)}catch{}};
 try{const t=localStorage.getItem('tema');if(t){document.documentElement.dataset.theme=t;$('#theme').textContent=t==='dark'?'☾':'☀'}}catch{}
+function setAdmin(on){admin=on;$('#add').hidden=!on;$('#login').textContent=on?'Salir':'Ingresar';draw()}
+$('#login').onclick=async()=>{if(admin){await sb.auth.signOut();setAdmin(false)}else $('#ldlg').showModal()};
+$('#lcancel').onclick=()=>$('#ldlg').close();
+$('#lform').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);
+  const {error}=await sb.auth.signInWithPassword({email:f.get('email'),password:f.get('pass')});
+  if(error){alert('Email o contraseña incorrectos');return}
+  $('#ldlg').close();setAdmin(true)};
+sb.auth.getSession().then(({data})=>setAdmin(!!data.session));
 load();
 </script>
 </body>
